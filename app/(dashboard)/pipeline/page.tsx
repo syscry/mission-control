@@ -71,7 +71,6 @@ export default function PipelinePage() {
       <PageTitle
         title="Content Pipeline"
         description="Track content from idea to filming"
-        icon={Workflow}
       />
 
       <div className="flex items-center justify-between mb-6">

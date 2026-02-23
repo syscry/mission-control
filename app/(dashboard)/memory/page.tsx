@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MemoryStick, Search, FileText } from "lucide-react";
+import { Search, FileText } from "lucide-react";
 
 interface Memory {
   id: string;
@@ -56,7 +56,6 @@ export default function MemoryPage() {
       <PageTitle
         title="Memory"
         description="Browse and search through memories"
-        icon={MemoryStick}
       />
 
       <div className="flex gap-4 flex-1 overflow-hidden">

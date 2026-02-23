@@ -84,7 +84,6 @@ export default function TeamPage() {
       <PageTitle
         title="Team"
         description="Organization structure and agent roles"
-        icon={Network}
       />
 
       <div className="flex items-center justify-between mb-6">

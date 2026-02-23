@@ -78,7 +78,6 @@ export default function TasksPage() {
       <PageTitle
         title="Tasks Board"
         description="Track tasks assigned to you and OpenClaw"
-        icon={KanbanSquare}
       />
 
       <div className="flex items-center justify-between mb-6">
