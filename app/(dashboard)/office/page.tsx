@@ -1,13 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery } from "convex/react";
 import { Activity, Monitor, UserRound } from "lucide-react";
 import { PageTitle } from "@/components/dashboard/page-title";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-type Agent = {
+interface Agent {
   _id: string;
   name: string;
   type: "human" | "openclaw" | "subagent";
@@ -15,14 +14,14 @@ type Agent = {
   status: "working" | "idle" | "blocked";
   activeTask?: string;
   avatarEmoji: string;
-};
+}
 
-type DeskSlot = {
+interface DeskSlot {
   id: string;
   name: string;
   left: number;
   top: number;
-};
+}
 
 const DESK_SLOTS: DeskSlot[] = [
   { id: "desk-commander", name: "Command", left: 8, top: 10 },
@@ -33,6 +32,13 @@ const DESK_SLOTS: DeskSlot[] = [
   { id: "desk-overflow", name: "Overflow", left: 68, top: 58 }
 ];
 
+const mockAgents: Agent[] = [
+  { _id: "1", name: "You", type: "human", role: "Commander", status: "working", activeTask: "Reviewing dashboard", avatarEmoji: "👤" },
+  { _id: "2", name: "OpenClaw", type: "openclaw", role: "Assistant", status: "working", activeTask: "Deploying app", avatarEmoji: "🤖" },
+  { _id: "3", name: "Code Agent", type: "subagent", role: "Developer", status: "idle", avatarEmoji: "💻" },
+  { _id: "4", name: "Writer", type: "subagent", role: "Content", status: "idle", avatarEmoji: "✍️" },
+];
+
 function priority(agent: Agent) {
   if (agent.type === "human") return 0;
   if (agent.type === "openclaw") return 1;
@@ -40,7 +46,7 @@ function priority(agent: Agent) {
 }
 
 export default function OfficePage() {
-  const agents = (useQuery("agents:list", {}) as Agent[] | undefined) ?? [];
+  const agents = mockAgents;
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const orderedAgents = useMemo(
@@ -65,13 +71,14 @@ export default function OfficePage() {
       <PageTitle
         title="Office"
         description="Live floorplan of where agents are working right now."
-        actions={
-          <div className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-black/20 px-2.5 py-1.5 text-xs text-muted-foreground">
-            <Activity className="h-3.5 w-3.5 text-emerald-300" />
-            {agents.filter((agent) => agent.status === "working").length} active
-          </div>
-        }
       />
+
+      <div className="flex items-center justify-between">
+        <div className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-black/20 px-2.5 py-1.5 text-xs text-muted-foreground">
+          <Activity className="h-3.5 w-3.5 text-emerald-300" />
+          {agents.filter((agent) => agent.status === "working").length} active
+        </div>
+      </div>
 
       <Card className="glass border-white/10">
         <CardHeader>
