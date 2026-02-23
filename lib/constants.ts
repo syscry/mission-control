@@ -1,4 +1,4 @@
-import { Bot, Calendar, KanbanSquare, LayoutGrid, MemoryStick, Network, Workflow } from "lucide-react";
+import { Calendar, KanbanSquare, LayoutGrid, MemoryStick, Network, Workflow } from "lucide-react";
 
 export const NAV_ITEMS = [
   { href: "/tasks", label: "Tasks Board", icon: KanbanSquare },
