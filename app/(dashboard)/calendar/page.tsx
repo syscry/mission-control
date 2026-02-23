@@ -137,6 +137,7 @@ export default function CalendarPage() {
               <div
                 key={i}
                 className={`min-h-[60px] sm:min-h-[100px] p-1 sm:p-2 bg-black/20 ${isToday ? "ring-1 ring-inset ring-primary/50" : ""}`}
+              >
                 <div className={`text-sm mb-1 ${isToday ? "text-primary font-bold" : "text-white/60"}`}>
                   {day.getDate()}
                 </div>
