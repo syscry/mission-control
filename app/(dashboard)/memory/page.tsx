@@ -1,201 +1,124 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, FileText, Search } from "lucide-react";
-import { MarkdownViewer } from "@/components/dashboard/markdown-viewer";
+import { useState, useEffect } from "react";
 import { PageTitle } from "@/components/dashboard/page-title";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { MemoryStick, Search, FileText } from "lucide-react";
 
-type MemoryItem = {
+interface Memory {
   id: string;
-  source: "memory" | "diary";
   title: string;
-  path: string;
-  date: number;
-  updatedAt: number;
   content: string;
-  preview: string;
-};
-
-type MemoriesResponse = {
-  count: number;
-  memories: MemoryItem[];
-  roots: Array<{
-    source: "memory" | "diary";
-    root: string;
-    count: number;
-    error?: string;
-  }>;
-};
-
-function formatMemoryDate(timestamp: number) {
-  return new Date(timestamp).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  date: string;
+  type: "memory" | "diary";
 }
 
+const mockMemories: Memory[] = [
+  {
+    id: "1",
+    title: "February 22 - Quiet Day",
+    content: "A quiet, low-noise day with no major decisions or dramatic events...",
+    date: "2026-02-22",
+    type: "diary",
+  },
+  {
+    id: "2",
+    title: "Mission Control Built",
+    content: "Built a 6-component Mission Control dashboard with NextJS and Convex...",
+    date: "2026-02-23",
+    type: "memory",
+  },
+  {
+    id: "3",
+    title: "Homosync Project",
+    content: "Visual exploration of identity and synchronization. 35 PNG images...",
+    date: "2026-02-18",
+    type: "memory",
+  },
+];
+
 export default function MemoryPage() {
-  const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [data, setData] = useState<MemoriesResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [memories, setMemories] = useState<Memory[]>(mockMemories);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(mockMemories[0]);
 
-  useEffect(() => {
-    let alive = true;
-
-    async function loadMemories() {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch("/api/memories", { cache: "no-store" });
-        if (!response.ok) throw new Error(`Failed to load memories (${response.status})`);
-        const json = (await response.json()) as MemoriesResponse;
-        if (!alive) return;
-        setData(json);
-      } catch (err) {
-        if (!alive) return;
-        setError(err instanceof Error ? err.message : "Unable to load memory index");
-      } finally {
-        if (alive) setLoading(false);
-      }
-    }
-
-    void loadMemories();
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  const memories = data?.memories ?? [];
-
-  const filtered = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) return memories;
-
-    return memories.filter((item) =>
-      [item.title, item.path, item.source, item.preview, item.content].some((field) => field.toLowerCase().includes(normalized))
-    );
-  }, [memories, query]);
-
-  useEffect(() => {
-    if (!filtered.length) {
-      setSelectedId(null);
-      return;
-    }
-
-    const stillVisible = selectedId && filtered.some((item) => item.id === selectedId);
-    if (!stillVisible) setSelectedId(filtered[0].id);
-  }, [filtered, selectedId]);
-
-  const selected = filtered.find((item) => item.id === selectedId) ?? null;
-  const sourceSummary = data?.roots ?? [];
+  const filteredMemories = memories.filter(
+    (m) =>
+      m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col h-full">
       <PageTitle
         title="Memory"
-        description="Unified memory and diary index with global full-text search."
-        actions={
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            {sourceSummary.map((source) => (
-              <span key={source.source} className="rounded-md border border-white/10 bg-black/20 px-2 py-1">
-                {source.source}: {source.count}
-              </span>
-            ))}
-          </div>
-        }
+        description="Browse and search through memories"
+        icon={MemoryStick}
       />
 
-      <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <Card className="glass border-white/10">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Documents</CardTitle>
+      <div className="flex gap-4 flex-1 overflow-hidden">
+        <Card className="w-80 bg-white/5 border-white/10 flex flex-col">
+          <div className="p-4 border-b border-white/10">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
               <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search all memory content..."
-                className="pl-8"
+                placeholder="Search memories..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-white/5 border-white/10"
               />
             </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ScrollArea className="h-[65vh]">
-              <div className="space-y-2 p-4 pt-0">
-                {loading ? <p className="text-sm text-muted-foreground">Loading memory index...</p> : null}
-                {error ? <p className="text-sm text-rose-300">{error}</p> : null}
-                {!loading && !error && filtered.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No markdown files matched your search.</p>
-                ) : null}
-
-                {filtered.map((item) => {
-                  const active = item.id === selectedId;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setSelectedId(item.id)}
-                      className={`w-full rounded-xl border p-3 text-left transition ${
-                        active ? "border-primary/40 bg-primary/10" : "border-white/10 bg-black/20 hover:bg-white/5"
-                      }`}
-                    >
-                      <div className="mb-2 flex items-start justify-between gap-2">
-                        <p className="text-sm font-medium">{item.title}</p>
-                        <Badge variant={item.source === "diary" ? "secondary" : "outline"}>{item.source}</Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{item.preview}</p>
-                      <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-                        <span className="truncate">{item.path}</span>
-                        <span className="inline-flex items-center gap-1">
-                          <CalendarDays className="h-3 w-3" />
-                          {formatMemoryDate(item.date)}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </ScrollArea>
-          </CardContent>
+          </div>
+          <ScrollArea className="flex-1">
+            <div className="p-2 space-y-1">
+              {filteredMemories.map((memory) => (
+                <button
+                  key={memory.id}
+                  onClick={() => setSelectedMemory(memory)}
+                  className={`w-full text-left p-3 rounded-lg transition-colors ${
+                    selectedMemory?.id === memory.id
+                      ? "bg-white/10"
+                      : "hover:bg-white/5"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <FileText className="w-4 h-4 text-white/40" />
+                    <span className="text-xs text-white/40">{memory.date}</span>
+                  </div>
+                  <p className="text-sm font-medium truncate">{memory.title}</p>
+                  <Badge
+                    variant="outline"
+                    className="mt-2 text-xs"
+                  >
+                    {memory.type}
+                  </Badge>
+                </button>
+              ))}
+            </div>
+          </ScrollArea>
         </Card>
 
-        <Card className="glass border-white/10">
-          <CardHeader className="border-b border-white/10">
-            {selected ? (
-              <div className="space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <CardTitle className="text-base">{selected.title}</CardTitle>
-                  <Badge variant={selected.source === "diary" ? "secondary" : "outline"}>{selected.source}</Badge>
-                </div>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1">
-                    <FileText className="h-3 w-3" />
-                    {selected.path}
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <CalendarDays className="h-3 w-3" />
-                    {formatMemoryDate(selected.date)}
-                  </span>
-                </div>
+        <Card className="flex-1 bg-white/5 border-white/10 p-6 overflow-auto">
+          {selectedMemory ? (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">{selectedMemory.title}</h2>
+                <Badge variant="outline">{selectedMemory.date}</Badge>
               </div>
-            ) : (
-              <CardTitle className="text-base">Select a document to view</CardTitle>
-            )}
-          </CardHeader>
-          <CardContent className="p-0">
-            <ScrollArea className="h-[65vh]">
-              <div className="p-5">
-                {selected ? (
-                  <MarkdownViewer content={selected.content} />
-                ) : (
-                  <p className="text-sm text-muted-foreground">Choose a memory entry from the left panel.</p>
-                )}
+              <div className="prose prose-invert max-w-none">
+                <p className="text-white/80 leading-relaxed whitespace-pre-wrap">
+                  {selectedMemory.content}
+                </p>
               </div>
-            </ScrollArea>
-          </CardContent>
+            </div>
+          ) : (
+            <div className="h-full flex items-center justify-center text-white/40">
+              Select a memory to view
+            </div>
+          )}
         </Card>
       </div>
     </div>

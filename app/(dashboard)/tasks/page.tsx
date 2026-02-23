@@ -1,211 +1,184 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { ArrowLeft, ArrowRight, Bot, CheckCheck, Plus } from "lucide-react";
+import { useState } from "react";
 import { PageTitle } from "@/components/dashboard/page-title";
-import { SeedControl } from "@/components/dashboard/seed-control";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { TASK_COLUMNS } from "@/lib/constants";
-import { TASK_STATUS_LABELS, formatDateTime } from "@/lib/dashboard";
-import { TaskOwner, TaskStatus } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { KanbanSquare, Plus, Sparkles, User, Bot } from "lucide-react";
+import { TASK_COLUMNS, OWNER_OPTIONS } from "@/lib/constants";
 
-type Task = {
-  _id: string;
+interface Task {
+  id: string;
   title: string;
   description?: string;
-  status: TaskStatus;
-  assignee: TaskOwner;
+  status: "todo" | "inProgress" | "done";
+  owner: "me" | "openclaw";
   priority: "low" | "medium" | "high";
-  dueDate?: number;
-};
-
-const order: TaskStatus[] = ["todo", "inProgress", "done"];
-
-function nextStatus(current: TaskStatus, delta: -1 | 1) {
-  const idx = order.indexOf(current);
-  return order[Math.min(Math.max(0, idx + delta), order.length - 1)];
+  dueDate?: string;
 }
 
-export default function TasksBoardPage() {
-  const [filter, setFilter] = useState<"all" | TaskOwner>("all");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [assignee, setAssignee] = useState<TaskOwner>("me");
-  const [dueDate, setDueDate] = useState("");
+const mockTasks: Task[] = [
+  { id: "1", title: "Review Mission Control design", status: "inProgress", owner: "me", priority: "high" },
+  { id: "2", title: "Build content pipeline", status: "todo", owner: "openclaw", priority: "high" },
+  { id: "3", title: "Archive February memories", status: "done", owner: "openclaw", priority: "medium" },
+];
 
-  const tasks =
-    (useQuery("tasks:list", {
-      assignee: filter === "all" ? undefined : filter
-    }) as Task[] | undefined) ?? [];
+export default function TasksPage() {
+  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskOwner, setNewTaskOwner] = useState<"me" | "openclaw">("me");
+  const [showAddForm, setShowAddForm] = useState(false);
 
-  const createTask = useMutation("tasks:create");
-  const updateTaskStatus = useMutation("tasks:updateStatus");
-  const updateTaskAssignee = useMutation("tasks:updateAssignee");
-  const openclawAdvance = useMutation("tasks:openclawAdvance");
+  const tasksByColumn = {
+    todo: tasks.filter((t) => t.status === "todo"),
+    inProgress: tasks.filter((t) => t.status === "inProgress"),
+    done: tasks.filter((t) => t.status === "done"),
+  };
 
-  const grouped = useMemo(() => {
-    return TASK_COLUMNS.reduce<Record<TaskStatus, Task[]>>(
-      (acc, col) => {
-        acc[col.key as TaskStatus] = tasks.filter((task) => task.status === col.key);
-        return acc;
-      },
-      { todo: [], inProgress: [], done: [] }
-    );
-  }, [tasks]);
+  const addTask = () => {
+    if (!newTaskTitle.trim()) return;
+    const newTask: Task = {
+      id: Date.now().toString(),
+      title: newTaskTitle,
+      status: "todo",
+      owner: newTaskOwner,
+      priority: "medium",
+    };
+    setTasks([...tasks, newTask]);
+    setNewTaskTitle("");
+    setShowAddForm(false);
+  };
+
+  const moveTask = (taskId: string, newStatus: Task["status"]) => {
+    setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return "bg-rose-500/20 text-rose-300 border-rose-500/30";
+      case "medium":
+        return "bg-amber-500/20 text-amber-300 border-amber-500/30";
+      default:
+        return "bg-slate-500/20 text-slate-300 border-slate-500/30";
+    }
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col h-full">
       <PageTitle
         title="Tasks Board"
-        description="Kanban board for human vs OpenClaw execution with real-time status transitions."
-        actions={
-          <>
-            <SeedControl />
-            <Button variant="secondary" size="sm" onClick={() => openclawAdvance({})}>
-              <Bot className="h-4 w-4" />
-              OpenClaw Advance
-            </Button>
-            <Select value={filter} onValueChange={(value) => setFilter(value as "all" | TaskOwner)}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter assignee" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All assignees</SelectItem>
-                <SelectItem value="me">Me</SelectItem>
-                <SelectItem value="openclaw">OpenClaw</SelectItem>
-              </SelectContent>
-            </Select>
-          </>
-        }
+        description="Track tasks assigned to you and OpenClaw"
+        icon={KanbanSquare}
       />
 
-      <Card className="glass border-white/10">
-        <CardHeader>
-          <CardTitle className="text-base">Create Task</CardTitle>
-          <CardDescription>Add work for yourself or OpenClaw.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-2">
-          <Input placeholder="Task title" value={title} onChange={(e) => setTitle(e.target.value)} />
-          <Input type="datetime-local" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
-          <Textarea
-            className="md:col-span-2"
-            placeholder="Task description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-white/60">
+            {tasks.length} tasks
+          </Badge>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => alert("OpenClaw would help move tasks forward")}
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            OpenClaw Advance
+          </Button>
+          <Button onClick={() => setShowAddForm(!showAddForm)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Task
+          </Button>
+        </div>
+      </div>
+
+      {showAddForm && (
+        <Card className="p-4 mb-6 bg-white/5 border-white/10">
           <div className="flex gap-2">
-            <Select value={assignee} onValueChange={(value) => setAssignee(value as TaskOwner)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Assignee" />
+            <Input
+              placeholder="Task title..."
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              className="flex-1 bg-white/5 border-white/10"
+            />
+            <Select
+              value={newTaskOwner}
+              onValueChange={(v: "me" | "openclaw") => setNewTaskOwner(v)}
+            >
+              <SelectTrigger className="w-[140px] bg-white/5 border-white/10">
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="me">Me</SelectItem>
-                <SelectItem value="openclaw">OpenClaw</SelectItem>
+                {OWNER_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-            <Button
-              className="w-full"
-              onClick={async () => {
-                if (!title.trim()) return;
-                await createTask({
-                  title: title.trim(),
-                  description: description.trim() || undefined,
-                  assignee,
-                  dueDate: dueDate ? new Date(dueDate).getTime() : undefined
-                });
-                setTitle("");
-                setDescription("");
-                setDueDate("");
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              Add Task
-            </Button>
+            <Button onClick={addTask}>Add</Button>
           </div>
-        </CardContent>
-      </Card>
+        </Card>
+      )}
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        {TASK_COLUMNS.map((column) => {
-          const columnTasks = grouped[column.key as TaskStatus] ?? [];
-          return (
-            <Card key={column.key} className="glass min-h-[360px] border-white/10">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">{column.label}</CardTitle>
-                  <Badge variant="secondary">{columnTasks.length}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {columnTasks.map((task) => {
-                  const statusIndex = order.indexOf(task.status);
-                  return (
-                    <div key={task._id} className="rounded-xl border border-white/10 bg-black/20 p-3">
-                      <div className="mb-2 flex items-start justify-between gap-2">
-                        <h3 className="font-medium leading-tight">{task.title}</h3>
-                        <Badge variant="outline">{task.priority}</Badge>
-                      </div>
-
-                      {task.description ? <p className="mb-2 text-xs text-muted-foreground">{task.description}</p> : null}
-
-                      <div className="mb-3 flex items-center gap-2 text-xs">
-                        <Badge variant="secondary">{TASK_STATUS_LABELS[task.status]}</Badge>
-                        <Badge variant="outline">{task.assignee === "me" ? "Me" : "OpenClaw"}</Badge>
-                      </div>
-
-                      {task.dueDate ? (
-                        <p className="mb-3 text-xs text-muted-foreground">Due {formatDateTime(task.dueDate)}</p>
-                      ) : null}
-
-                      <div className="mb-2">
-                        <Select
-                          value={task.assignee}
-                          onValueChange={(value) => updateTaskAssignee({ taskId: task._id as never, assignee: value as TaskOwner })}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="me">Me</SelectItem>
-                            <SelectItem value="openclaw">OpenClaw</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="flex items-center justify-between gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={statusIndex === 0}
-                          onClick={() => updateTaskStatus({ taskId: task._id as never, status: nextStatus(task.status, -1) })}
-                        >
-                          <ArrowLeft className="h-3 w-3" />
-                          Back
-                        </Button>
-
-                        <Button
-                          size="sm"
-                          disabled={statusIndex === order.length - 1}
-                          onClick={() => updateTaskStatus({ taskId: task._id as never, status: nextStatus(task.status, 1) })}
-                        >
-                          {statusIndex === order.length - 2 ? <CheckCheck className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
-                          Next
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-                {columnTasks.length === 0 ? <p className="text-sm text-muted-foreground">No tasks in this column.</p> : null}
-              </CardContent>
-            </Card>
-          );
-        })}
+      <div className="grid grid-cols-3 gap-4 flex-1">
+        {TASK_COLUMNS.map((column) => (
+          <Card
+            key={column.key}
+            className="bg-white/5 border-white/10 flex flex-col"
+          >
+            <div className="p-4 border-b border-white/10">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium">{column.label}</h3>
+                <Badge variant="outline" className="text-white/60">
+                  {tasksByColumn[column.key as keyof typeof tasksByColumn].length}
+                </Badge>
+              </div>
+            </div>
+            <div className="p-4 space-y-3 flex-1 overflow-auto">
+              {tasksByColumn[column.key as keyof typeof tasksByColumn].map((task) => (
+                <Card
+                  key={task.id}
+                  className="p-3 bg-white/5 border-white/10 hover:bg-white/10 transition-colors cursor-pointer group"
+                  onClick={() => {
+                    const statuses: Task["status"][] = ["todo", "inProgress", "done"];
+                    const currentIdx = statuses.indexOf(task.status);
+                    const nextStatus = statuses[(currentIdx + 1) % statuses.length];
+                    moveTask(task.id, nextStatus);
+                  }}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${getPriorityColor(task.priority)}`}
+                    >
+                      {task.priority}
+                    </Badge>
+                    {task.owner === "me" ? (
+                      <User className="w-4 h-4 text-white/40" />
+                    ) : (
+                      <Bot className="w-4 h-4 text-primary" />
+                    )}
+                  </div>
+                  <p className="text-sm font-medium mb-1">{task.title}</p>
+                  {task.dueDate && (
+                    <p className="text-xs text-white/40">Due {task.dueDate}</p>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </Card>
+        ))}
       </div>
     </div>
   );
