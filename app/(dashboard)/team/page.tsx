@@ -86,17 +86,17 @@ export default function TeamPage() {
         description="Organization structure and agent roles"
       />
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
         <Badge variant="outline" className="text-white/60">
           {agents.length} members
         </Badge>
-        <Button>
+        <Button className="w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
           Spawn Subagent
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {agents.map((agent) => (
           <Card
             key={agent.id}

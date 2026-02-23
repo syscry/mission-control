@@ -80,23 +80,23 @@ export default function TasksPage() {
         description="Track tasks assigned to you and OpenClaw"
       />
 
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-white/60">
-            {tasks.length} tasks
-          </Badge>
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+        <Badge variant="outline" className="text-white/60">
+          {tasks.length} tasks
+        </Badge>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
             onClick={() => alert("OpenClaw would help move tasks forward")}
+            className="flex-1 sm:flex-none"
           >
             <Sparkles className="w-4 h-4 mr-2" />
-            OpenClaw Advance
+            <span className="hidden sm:inline">OpenClaw Advance</span>
+            <span className="sm:hidden">Advance</span>
           </Button>
-          <Button onClick={() => setShowAddForm(!showAddForm)}>
+          <Button onClick={() => setShowAddForm(!showAddForm)} className="flex-1 sm:flex-none">
             <Plus className="w-4 h-4 mr-2" />
-            Add Task
+            Add
           </Button>
         </div>
       </div>
@@ -130,11 +130,11 @@ export default function TasksPage() {
         </Card>
       )}
 
-      <div className="grid grid-cols-3 gap-4 flex-1">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
         {TASK_COLUMNS.map((column) => (
           <Card
             key={column.key}
-            className="bg-white/5 border-white/10 flex flex-col"
+            className="bg-white/5 border-white/10 flex flex-col min-h-[300px] md:min-h-0"
           >
             <div className="p-4 border-b border-white/10">
               <div className="flex items-center justify-between">

@@ -1,11 +1,13 @@
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { TopBar } from "@/components/dashboard/topbar";
+import { MobileNav } from "@/components/dashboard/mobile-nav";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen md:grid md:grid-cols-[18rem_1fr]">
       <Sidebar />
-      <main className="min-h-screen">
+      <main className="min-h-screen pb-20 md:pb-0">
+        <MobileNav />
         <TopBar />
         <div className="p-4 md:p-6">{children}</div>
       </main>

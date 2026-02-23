@@ -73,11 +73,11 @@ export default function PipelinePage() {
         description="Track content from idea to filming"
       />
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
         <Badge variant="outline" className="text-white/60">
           {items.length} items
         </Badge>
-        <Button onClick={() => setShowAddForm(!showAddForm)}>
+        <Button onClick={() => setShowAddForm(!showAddForm)} className="w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
           Add Idea
         </Button>
@@ -97,11 +97,11 @@ export default function PipelinePage() {
         </Card>
       )}
 
-      <div className="grid grid-cols-4 gap-4 flex-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
         {PIPELINE_COLUMNS.map((column) => (
           <Card
             key={column.key}
-            className="bg-white/5 border-white/10 flex flex-col"
+            className="bg-white/5 border-white/10 flex flex-col min-h-[250px] sm:min-h-0"
           >
             <div className="p-4 border-b border-white/10">
               <div className="flex items-center justify-between">

@@ -58,8 +58,8 @@ export default function MemoryPage() {
         description="Browse and search through memories"
       />
 
-      <div className="flex gap-4 flex-1 overflow-hidden">
-        <Card className="w-80 bg-white/5 border-white/10 flex flex-col">
+      <div className="flex flex-col md:flex-row gap-4 flex-1 overflow-hidden">
+        <Card className="w-full md:w-80 bg-white/5 border-white/10 flex flex-col">
           <div className="p-4 border-b border-white/10">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />

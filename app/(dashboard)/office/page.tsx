@@ -81,11 +81,11 @@ export default function OfficePage() {
       </div>
 
       <Card className="glass border-white/10">
-        <CardHeader>
-          <CardTitle className="text-base">Office Floorplan</CardTitle>
+        <CardHeader className="px-4 py-3 md:px-6 md:py-4">
+          <CardTitle className="text-sm md:text-base">Office Floorplan</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="relative min-h-[540px] overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+        <CardContent className="p-3 md:p-6">
+          <div className="relative min-h-[350px] md:min-h-[540px] overflow-hidden rounded-xl md:rounded-2xl border border-white/10 bg-black/30">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(56,189,248,0.12),transparent_36%),radial-gradient(circle_at_80%_100%,rgba(16,185,129,0.08),transparent_40%)]" />
             <div className="absolute inset-4 rounded-xl border border-dashed border-white/10" />
 

@@ -68,12 +68,12 @@ export default function CalendarPage() {
         description="Scheduled tasks and events"
       />
 
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
-          <span className="text-lg font-medium min-w-[200px] text-center">
+          <span className="text-base sm:text-lg font-medium flex-1 sm:min-w-[200px] text-center">
             {currentDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
           </span>
           <Button variant="outline" size="icon" onClick={() => navigate(1)}>
@@ -122,8 +122,9 @@ export default function CalendarPage() {
       <Card className="flex-1 bg-white/5 border-white/10 overflow-hidden">
         <div className="grid grid-cols-7 gap-px bg-white/10">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-            <div key={day} className="p-3 text-center text-sm font-medium text-white/60 bg-black/40">
-              {day}
+            <div key={day} className="p-2 sm:p-3 text-center text-xs sm:text-sm font-medium text-white/60 bg-black/40">
+              <span className="hidden sm:inline">{day}</span>
+              <span className="sm:hidden">{day.slice(0, 1)}</span>
             </div>
           ))}
         </div>
@@ -135,8 +136,7 @@ export default function CalendarPage() {
             return (
               <div
                 key={i}
-                className={`min-h-[100px] p-2 bg-black/20 ${isToday ? "ring-1 ring-inset ring-primary/50" : ""}`}
-              >
+                className={`min-h-[60px] sm:min-h-[100px] p-1 sm:p-2 bg-black/20 ${isToday ? "ring-1 ring-inset ring-primary/50" : ""}`}
                 <div className={`text-sm mb-1 ${isToday ? "text-primary font-bold" : "text-white/60"}`}>
                   {day.getDate()}
                 </div>
