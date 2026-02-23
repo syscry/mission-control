@@ -4,7 +4,11 @@ const nextConfig = {
     typedRoutes: true
   },
   output: 'export',
-  distDir: 'dist'
+  distDir: 'dist',
+  basePath: '/mission-control',
+  images: {
+    unoptimized: true
+  }
 };
 
 export default nextConfig;
