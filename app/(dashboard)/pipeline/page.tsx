@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import { Workflow, Plus, Image, FileText, Video } from "lucide-react";
 import { PIPELINE_COLUMNS } from "@/lib/constants";
 

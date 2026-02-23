@@ -56,7 +56,7 @@ const mockAgents: Agent[] = [
 ];
 
 export default function TeamPage() {
-  const [agents, setAgents] = useState<Agent[]>(mockAgents);
+  const agents = mockAgents;
 
   const getStatusColor = (status: string) => {
     switch (status) {

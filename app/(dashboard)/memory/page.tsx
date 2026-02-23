@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { PageTitle } from "@/components/dashboard/page-title";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -41,7 +41,7 @@ const mockMemories: Memory[] = [
 ];
 
 export default function MemoryPage() {
-  const [memories, setMemories] = useState<Memory[]>(mockMemories);
+  const memories = mockMemories;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(mockMemories[0]);
 
