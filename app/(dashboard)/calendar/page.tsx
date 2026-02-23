@@ -66,7 +66,6 @@ export default function CalendarPage() {
       <PageTitle
         title="Calendar"
         description="Scheduled tasks and events"
-        icon={Calendar}
       />
 
       <div className="flex items-center justify-between mb-6">
