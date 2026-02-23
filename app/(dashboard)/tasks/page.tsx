@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { KanbanSquare, Plus, Sparkles, User, Bot } from "lucide-react";
+import { Plus, Sparkles, User, Bot } from "lucide-react";
 import { TASK_COLUMNS, OWNER_OPTIONS } from "@/lib/constants";
 
 interface Task {

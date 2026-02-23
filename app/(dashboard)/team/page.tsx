@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Network, User, Bot, Users, Plus, MessageSquare } from "lucide-react";
+import { User, Bot, Users, Plus, MessageSquare } from "lucide-react";
 
 interface Agent {
   id: string;
