@@ -2,12 +2,6 @@
 const nextConfig = {
   experimental: {
     typedRoutes: true
-  },
-  output: 'export',
-  distDir: 'dist',
-  basePath: '/mission-control',
-  images: {
-    unoptimized: true
   }
 };
 
